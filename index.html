@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Map with Imagery, Parcels, Contours, and Location</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Esri Leaflet Plugin -->
+  <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .leaflet-bar a {
+      text-decoration: none;
+      font-size: 18px;
+      line-height: 26px;
+      padding: 0 6px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    // Initialize map at Grayson County
+    var map = L.map('map').setView([36.7565, -81.0675], 18);
+
+    // VBMP Imagery Basemap
+    var imagery = L.esri.tiledMapLayer({
+      url: 'https://vginmaps.vdem.virginia.gov/arcgis/rest/services/VBMP_Imagery/MostRecentImagery_WGS/MapServer',
+      attribution: 'Imagery © Virginia VBMP'
+    }).addTo(map); // Added by default
+
+    // Grayson County Parcel Layer (Layer 19)
+    var parcels = L.esri.dynamicMapLayer({
+      url: 'https://webgis.net/arcgis/rest/services/VA/GraysonCo_WebGIS1/MapServer',
+      layers: [19],
+      opacity: 0.6,
+      attribution: 'Parcels © Grayson County GIS'
+    });
+
+    // USGS Contours Layer (Layer 24)
+    var usgsContours = L.esri.dynamicMapLayer({
+      url: 'https://carto.nationalmap.gov/arcgis/rest/services/contours/MapServer',
+      layers: [24],
+      opacity: 0.5,
+      attribution: 'Contours © USGS'
+    });
+
+    // USGS Contour Labels (Layer 20)
+    var contourLabels = L.esri.dynamicMapLayer({
+      url: 'https://carto.nationalmap.gov/arcgis/rest/services/contours/MapServer',
+      layers: [20],
+      opacity: 1,
+      attribution: 'Contour Labels © USGS'
+    });
+
+    // Layer control
+    var baseLayers = {
+      'VBMP Imagery': imagery
+    };
+
+    var overlays = {
+      'Parcels': parcels,
+      'USGS Contours': usgsContours,
+      'Contour Labels': contourLabels
+    };
+
+    L.control.layers(baseLayers, overlays).addTo(map);
+
+    // 📍 Add Locate Me Button
+    var locateControl = L.control({position: 'topleft'});
+
+    locateControl.onAdd = function(map) {
+      var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+      var button = L.DomUtil.create('a', '', div);
+      button.innerHTML = '📍';
+      button.href = '#';
+      button.title = 'Locate Me';
+
+      L.DomEvent.on(button, 'click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        L.DomEvent.preventDefault(e);
+        map.locate({setView: true, maxZoom: 18});
+      });
+
+      return div;
+    };
+
+    locateControl.addTo(map);
+
+    // When location is found
+    map.on('locationfound', function(e) {
+      L.marker(e.latlng).addTo(map)
+        .bindPopup('You are here!')
+        .openPopup();
+    });
+
+    // Handle location error
+    map.on('locationerror', function(e) {
+      alert('Location access denied or unavailable.');
+    });
+  </script>
+</body>
+</html>
