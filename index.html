@@ -100,8 +100,14 @@
 
     // When location is found
     map.on('locationfound', function(e) {
-      L.marker(e.latlng).addTo(map)
-        .openPopup();
+      L.circleMarker(e.latlng, {
+        radius: 6,
+        color: '#136AEC',
+        fillColor: '#2A93EE',
+        fillOpacity: 0.9
+        weight: 2
+    }).addTo(map)
+
     });
 
     // Handle location error
