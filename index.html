@@ -98,17 +98,24 @@
 
     locateControl.addTo(map);
 
-    // When location is found
+    var locationDot; // global variable to hold the current location marker
+      
     map.on('locationfound', function(e) {
-      L.circleMarker(e.latlng, {
+      // Remove previous dot if exists
+      if (locationDot) {
+        map.removeLayer(locationDot);
+      }
+    
+      // Add new circleMarker as a small dot
+      locationDot = L.circleMarker(e.latlng, {
         radius: 6,
         color: '#136AEC',
         fillColor: '#2A93EE',
-        fillOpacity: 0.9
+        fillOpacity: 0.9,
         weight: 2
-    }).addTo(map)
-
+      }).addTo(map);
     });
+
 
     // Handle location error
     map.on('locationerror', function(e) {
